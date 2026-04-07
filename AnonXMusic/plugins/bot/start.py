@@ -31,13 +31,13 @@ from strings import get_string
 
 # ভিডিওর লিস্ট (আপনার নিজের ভিডিও লিংক দিন - 6-7 টা)
 START_VIDEO_URLS = [
-    "https://telegra.ph/file/your_video_1.mp4",   # আপনার ভিডিও লিংক দিন
-    "https://telegra.ph/file/your_video_2.mp4",
-    "https://telegra.ph/file/your_video_3.mp4",
-    "https://telegra.ph/file/your_video_4.mp4",
-    "https://telegra.ph/file/your_video_5.mp4",
-    "https://telegra.ph/file/your_video_6.mp4",
-    "https://telegra.ph/file/your_video_7.mp4",
+    "https://files.catbox.moe/3kb787.mp4",   # আপনার ভিডিও লিংক দিন
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
 ]
 
 # হিউজ রিঅ্যাকশনের ফাংশন
