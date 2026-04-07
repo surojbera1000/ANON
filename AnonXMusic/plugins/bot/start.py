@@ -29,6 +29,60 @@ from AnonXMusic.utils.inline import help_pannel, private_panel, start_panel
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 
+# ভিডিওর লিস্ট (আপনার নিজের ভিডিও লিংক দিন - 6-7 টা)
+START_VIDEO_URLS = [
+    "https://telegra.ph/file/your_video_1.mp4",   # আপনার ভিডিও লিংক দিন
+    "https://telegra.ph/file/your_video_2.mp4",
+    "https://telegra.ph/file/your_video_3.mp4",
+    "https://telegra.ph/file/your_video_4.mp4",
+    "https://telegra.ph/file/your_video_5.mp4",
+    "https://telegra.ph/file/your_video_6.mp4",
+    "https://telegra.ph/file/your_video_7.mp4",
+]
+
+# হিউজ রিঅ্যাকশনের ফাংশন
+async def send_huge_reactions(message: Message):
+    """একাধিক রিঅ্যাকশন পাঠানোর ফাংশন"""
+    reactions = ['❤️', '🔥', '🎉', '🥳', '🎸', '💚']
+    for emoji in reactions:
+        try:
+            await message.react(emoji)
+            await asyncio.sleep(0.3)  # প্রতিটি রিঅ্যাকশনের মধ্যে সামান্য বিরতি
+        except Exception as e:
+            print(f"Reaction error: {e}")
+            continue
+
+# ভিডিও সেন্ড করার ফাংশন (স্টিকার + ভিডিও + রিঅ্যাকশন)
+async def send_start_video(client, message: Message, caption_text: str, reply_markup=None):
+    """স্টিকার, ভিডিও এবং হিউজ রিঅ্যাকশন পাঠায়"""
+    try:
+        # স্টিকার পাঠানো
+        await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
+        
+        # র্যান্ডম ভিডিও সিলেক্ট
+        video_url = random.choice(START_VIDEO_URLS)
+        
+        # ভিডিও পাঠানো
+        video_msg = await message.reply_video(
+            video=video_url,
+            caption=caption_text,
+            reply_markup=reply_markup,
+            supports_streaming=True
+        )
+        
+        # হিউজ রিঅ্যাকশন দেওয়া
+        await send_huge_reactions(video_msg)
+        
+        return video_msg
+    except Exception as e:
+        print(f"Video send error: {e}")
+        # ব্যাকআপ: যদি ভিডিও কাজ না করে তাহলে ফটো পাঠাবে
+        return await message.reply_photo(
+            photo=random.choice(config.START_IMG_URL),
+            caption=caption_text,
+            reply_markup=reply_markup
+        )
+
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
@@ -38,12 +92,12 @@ async def start_pm(client, message: Message, _):
         name = message.text.split(None, 1)[1]
         if name[0:4] == "help":
             keyboard = help_pannel(_)
-            await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
-            return await message.reply_photo(
-                photo=random.choice(config.START_IMG_URL),
-                caption=_["help_1"].format(config.SUPPORT_CHAT),
-                reply_markup=keyboard,
+            await send_start_video(
+                client, message,
+                caption_text=_["help_1"].format(config.SUPPORT_CHAT),
+                reply_markup=keyboard
             )
+            return
         if name[0:3] == "sud":
             await sudoers_list(client=client, message=message, _=_)
             if await is_on_off(2):
@@ -91,11 +145,10 @@ async def start_pm(client, message: Message, _):
                 )
     else:
         out = private_panel(_)
-        await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
-        await message.reply_photo(
-            photo=random.choice(config.START_IMG_URL),
-            caption=_["start_2"].format(message.from_user.mention, app.mention),
-            reply_markup=InlineKeyboardMarkup(out),
+        await send_start_video(
+            client, message,
+            caption_text=_["start_2"].format(message.from_user.mention, app.mention),
+            reply_markup=InlineKeyboardMarkup(out)
         )
         if await is_on_off(2):
             return await app.send_message(
@@ -110,22 +163,22 @@ async def start_gp(client, message: Message, _):
     out = start_panel(_)
     uptime = int(time.time() - _boot_)
     try:
-        await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-    )
+        await send_start_video(
+            client, message,
+            caption_text=_["start_1"].format(app.mention, get_readable_time(uptime)),
+            reply_markup=InlineKeyboardMarkup(out)
+        )
         return await add_served_chat(message.chat.id)
     except ChannelPrivate:
         return
     except SlowmodeWait as e:
         asyncio.sleep(e.value)
         try:
-            await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-        )
+            await send_start_video(
+                client, message,
+                caption_text=_["start_1"].format(app.mention, get_readable_time(uptime)),
+                reply_markup=InlineKeyboardMarkup(out)
+            )
             return await add_served_chat(message.chat.id)
         except:
             return
@@ -166,15 +219,15 @@ async def welcome(client, message: Message):
                         return await app.leave_chat(message.chat.id)
 
                 out = start_panel(_)
-                await message.reply_photo(
-                    photo=random.choice(config.START_IMG_URL),
-                    caption=_["start_3"].format(
+                await send_start_video(
+                    client, message,
+                    caption_text=_["start_3"].format(
                         message.from_user.first_name,
                         app.mention,
                         message.chat.title,
                         app.mention,
                     ),
-                    reply_markup=InlineKeyboardMarkup(out),
+                    reply_markup=InlineKeyboardMarkup(out)
                 )
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
