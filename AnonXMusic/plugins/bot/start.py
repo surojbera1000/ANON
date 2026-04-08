@@ -40,30 +40,41 @@ START_VIDEO_URLS = [
     "https://files.catbox.moe/vlcqn3.mp4",
 ]
 
-# শুধু ফ্লাইং লাভ রিঅ্যাকশন (❤️) - উড়ন্ত অবস্থায়
-async def send_flying_love_reactions(message: Message):
-    """শুধু লাভ রিঅ্যাকশন (❤️) উড়ন্ত ইফেক্টে পাঠাবে"""
-    love_emoji = '❤️'
-    
-    # 10-15 বার লাভ রিঅ্যাকশন দেবে (ফ্লাইং ইফেক্টের জন্য)
-    num_reactions = random.randint(10, 15)
-    
-    for i in range(num_reactions):
-        try:
-            await message.react(love_emoji)
-            await asyncio.sleep(0.1)  # খুব দ্রুত - ফ্লাইং ইফেক্ট
-        except Exception as e:
-            print(f"Love reaction error: {e}")
-            continue
+# ফ্লাইং লাভের জন্য অ্যানিমেটেড স্টিকার (উড়ন্ত হৃদয়)
+FLYING_LOVE_STICKERS = [
+    "CAACAgUAAxkBAAPnXUJkAAH8mXkAARUAAWnIAAV_AAFGAAEWCQACOQsAAgIYVhVbUpEWeWRUUDME",  # Flying heart sticker 1
+    "CAACAgUAAxkBAAPoXUJkAAH8mXoAARUAAWnIAAV_AAFGAAEWCQACOgsAAgIYVhVbUpEWeWRUUDME",  # Flying heart sticker 2
+]
 
-# ভিডিও সেন্ড করার ফাংশন (Eshani Music স্টাইলে)
-async def send_start_video(client, message: Message, caption_text: str, reply_markup=None):
-    """শুধু ভিডিও + ফ্লাইং লাভ রিঅ্যাকশন"""
+# ফ্লাইং লাভ ইফেক্ট (একাধিক অ্যানিমেটেড স্টিকার + রিঅ্যাকশন)
+async def send_flying_love_effect(message: Message):
+    """ভিডিওর উপরে ফ্লাইং লাভ ইফেক্ট তৈরি করবে"""
     try:
-        # র্যান্ডম ভিডিও সিলেক্ট
+        # 1. প্রথমে দ্রুত রিঅ্যাকশন দেবে (Telegram এর ডিফল্ট)
+        for _ in range(5):
+            await message.react('❤️')
+            await asyncio.sleep(0.15)
+        
+        # 2. অ্যানিমেটেড ফ্লাইং লাভ স্টিকার পাঠাবে (উড়ন্ত ইফেক্ট)
+        for i in range(8):  # 8 বার উড়ন্ত স্টিকার
+            sticker = random.choice(FLYING_LOVE_STICKERS)
+            await message.reply_sticker(sticker)
+            await asyncio.sleep(0.2)
+            
+        # 3. আবারও রিঅ্যাকশন (ফ্লাইং ফিল দিতে)
+        for _ in range(3):
+            await message.react('❤️')
+            await asyncio.sleep(0.1)
+            
+    except Exception as e:
+        print(f"Flying love effect error: {e}")
+
+# ভিডিও সেন্ড করার ফাংশন
+async def send_start_video(client, message: Message, caption_text: str, reply_markup=None):
+    """ভিডিও + ফ্লাইং লাভ ইফেক্ট"""
+    try:
         video_url = random.choice(START_VIDEO_URLS)
         
-        # ভিডিও পাঠানো
         video_msg = await message.reply_video(
             video=video_url,
             caption=caption_text,
@@ -71,13 +82,13 @@ async def send_start_video(client, message: Message, caption_text: str, reply_ma
             supports_streaming=True
         )
         
-        # ফ্লাইং লাভ রিঅ্যাকশন (শুধু ❤️ উড়ন্ত অবস্থায়)
-        await send_flying_love_reactions(video_msg)
+        # ফ্লাইং লাভ ইফেক্ট শুরু
+        await send_flying_love_effect(video_msg)
         
         return video_msg
     except Exception as e:
         print(f"Video send error: {e}")
-        return await message.reply_text("❌ ভিডিও লোড করতে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।")
+        return await message.reply_text("❌ ভিডিও লোড করতে সমস্যা হচ্ছে")
 
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
