@@ -31,13 +31,13 @@ from strings import get_string
 
 # আপনার 6-7 টা ভিডিওর লিংক এখানে দিন (শুধু ভিডিও)
 START_VIDEO_URLS = [
-    "https://telegra.ph/file/your_video_1.mp4",
-    "https://telegra.ph/file/your_video_2.mp4",
-    "https://telegra.ph/file/your_video_3.mp4",
-    "https://telegra.ph/file/your_video_4.mp4",
-    "https://telegra.ph/file/your_video_5.mp4",
-    "https://telegra.ph/file/your_video_6.mp4",
-    "https://telegra.ph/file/your_video_7.mp4",
+    "https://files.catbox.moe/3kb787.mp4",
+    "https://files.catbox.moe/aoafwn.mp4",
+    "https://files.catbox.moe/93r50w.mp4",
+    "https://files.catbox.moe/vlcqn3.mp4",
+    "https://files.catbox.moe/f544nb.mp4",
+    "https://files.catbox.moe/4tk8os.mp4",
+    "https://files.catbox.moe/3kb787.mp4",
 ]
 
 # ফ্লাইং রিঅ্যাকশন (উড়ন্ত ইফেক্ট) - পরপর অনেকগুলো রিঅ্যাকশন
