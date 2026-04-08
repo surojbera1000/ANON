@@ -91,7 +91,7 @@ def help_pannel(_, is_sudo, START: Union[bool, int] = None):
         upl.append(
             [
                 InlineKeyboardButton(
-                    text="Ai/TTS/IMAGE Settings",
+                    text="",
                     callback_data="help_callback hb16",
                 )
             ]
