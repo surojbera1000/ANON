@@ -29,40 +29,42 @@ from AnonXMusic.utils.inline import help_pannel, private_panel, start_panel
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 
-# ভিডিওর লিস্ট (আপনার নিজের ভিডিও লিংক দিন - 6-7 টা)
+# আপনার 6-7 টা ভিডিওর লিংক এখানে দিন (শুধু ভিডিও)
 START_VIDEO_URLS = [
-    "https://files.catbox.moe/3kb787.mp4",   # আপনার ভিডিও লিংক দিন
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
+    "https://telegra.ph/file/your_video_1.mp4",
+    "https://telegra.ph/file/your_video_2.mp4",
+    "https://telegra.ph/file/your_video_3.mp4",
+    "https://telegra.ph/file/your_video_4.mp4",
+    "https://telegra.ph/file/your_video_5.mp4",
+    "https://telegra.ph/file/your_video_6.mp4",
+    "https://telegra.ph/file/your_video_7.mp4",
 ]
 
-# হিউজ রিঅ্যাকশনের ফাংশন
-async def send_huge_reactions(message: Message):
-    """একাধিক রিঅ্যাকশন পাঠানোর ফাংশন"""
-    reactions = ['❤️', '🔥', '🎉', '🥳', '🎸', '💚']
-    for emoji in reactions:
+# ফ্লাইং রিঅ্যাকশন (উড়ন্ত ইফেক্ট) - পরপর অনেকগুলো রিঅ্যাকশন
+async def send_flying_reactions(message: Message):
+    """একসাথে অনেকগুলো রিঅ্যাকশন উড়িয়ে দেয় (ফ্লাইং ইফেক্ট)"""
+    reactions = ['❤️', '🔥', '🎉', '🥳', '🎸', '💚', '👍', '😍', '🤣', '🎵', '💥', '✨']
+    
+    # এলোমেলো করে 8-12টা রিঅ্যাকশন নিবে
+    num_reactions = random.randint(8, 12)
+    selected_reactions = random.sample(reactions, min(num_reactions, len(reactions)))
+    
+    for emoji in selected_reactions:
         try:
             await message.react(emoji)
-            await asyncio.sleep(0.3)  # প্রতিটি রিঅ্যাকশনের মধ্যে সামান্য বিরতি
+            await asyncio.sleep(0.15)  # স্পিডি রিঅ্যাকশন - উড়ন্ত ইফেক্টের মতো
         except Exception as e:
             print(f"Reaction error: {e}")
             continue
 
-# ভিডিও সেন্ড করার ফাংশন (স্টিকার + ভিডিও + রিঅ্যাকশন)
+# শুধু ভিডিও সেন্ড করার ফাংশন (কোনো ইমেজ নেই)
 async def send_start_video(client, message: Message, caption_text: str, reply_markup=None):
-    """স্টিকার, ভিডিও এবং হিউজ রিঅ্যাকশন পাঠায়"""
+    """শুধু ভিডিও + ফ্লাইং রিঅ্যাকশন (কোন ইমেজ নেই)"""
     try:
-        # স্টিকার পাঠানো
-        await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
-        
         # র্যান্ডম ভিডিও সিলেক্ট
         video_url = random.choice(START_VIDEO_URLS)
         
-        # ভিডিও পাঠানো
+        # শুধু ভিডিও পাঠানো (স্টিকারও বাদ দিলাম, শুধু ভিডিও)
         video_msg = await message.reply_video(
             video=video_url,
             caption=caption_text,
@@ -70,18 +72,15 @@ async def send_start_video(client, message: Message, caption_text: str, reply_ma
             supports_streaming=True
         )
         
-        # হিউজ রিঅ্যাকশন দেওয়া
-        await send_huge_reactions(video_msg)
+        # ফ্লাইং রিঅ্যাকশন - উড়ন্ত ইফেক্ট
+        await send_flying_reactions(video_msg)
         
         return video_msg
     except Exception as e:
         print(f"Video send error: {e}")
-        # ব্যাকআপ: যদি ভিডিও কাজ না করে তাহলে ফটো পাঠাবে
-        return await message.reply_photo(
-            photo=random.choice(config.START_IMG_URL),
-            caption=caption_text,
-            reply_markup=reply_markup
-        )
+        # ভিডিও না থাকলে কিছুই করবে না (ইমেজ নয়)
+        # বিকল্প হিসেবে শুধু টেক্সট মেসেজ দিতে চাইলে এখানে যোগ করুন
+        return await message.reply_text("❌ ভিডিও লোড করতে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।")
 
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
