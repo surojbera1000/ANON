@@ -29,7 +29,7 @@ from AnonXMusic.utils.inline import help_pannel, private_panel, start_panel
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 
-# আপনার দেওয়া ভিডিও লিংক (7 টা)
+# আপনার দেওয়া ভিডিও লিংক
 START_VIDEO_URLS = [
     "https://files.catbox.moe/3kb787.mp4",
     "https://files.catbox.moe/aoafwn.mp4",
@@ -40,49 +40,44 @@ START_VIDEO_URLS = [
     "https://files.catbox.moe/vlcqn3.mp4",
 ]
 
-# হিউজ ফ্লাইং রিঅ্যাকশন (ESHANI স্টাইলে)
-async def send_flying_reactions(message: Message):
-    """একসাথে অনেকগুলো রিঅ্যাকশন উড়িয়ে দেয় - ESHANI স্টাইল"""
-    reactions = ['❤️', '🔥', '🎉', '🥳', '🎸', '💚', '👍', '😍', '🤣', '🎵', '💥', '✨', '🌟', '⭐', '🎶']
+# শুধু ফ্লাইং লাভ রিঅ্যাকশন (❤️) - উড়ন্ত অবস্থায়
+async def send_flying_love_reactions(message: Message):
+    """শুধু লাভ রিঅ্যাকশন (❤️) উড়ন্ত ইফেক্টে পাঠাবে"""
+    love_emoji = '❤️'
     
-    # 10-15টা রিঅ্যাকশন এলোমেলোভাবে
+    # 10-15 বার লাভ রিঅ্যাকশন দেবে (ফ্লাইং ইফেক্টের জন্য)
     num_reactions = random.randint(10, 15)
-    selected_reactions = random.sample(reactions, min(num_reactions, len(reactions)))
     
-    for emoji in selected_reactions:
+    for i in range(num_reactions):
         try:
-            await message.react(emoji)
-            await asyncio.sleep(0.1)  # স্পিডি রিঅ্যাকশন - ফ্লাইং ইফেক্ট
+            await message.react(love_emoji)
+            await asyncio.sleep(0.1)  # খুব দ্রুত - ফ্লাইং ইফেক্ট
         except Exception as e:
-            print(f"Reaction error: {e}")
+            print(f"Love reaction error: {e}")
             continue
 
-# শুধু ভিডিও সেন্ড করার ফাংশন (ESHANI স্টাইলে)
+# ভিডিও সেন্ড করার ফাংশন (Eshani Music স্টাইলে)
 async def send_start_video(client, message: Message, caption_text: str, reply_markup=None):
-    """ESHANI MUSIC স্টাইলে ভিডিও + ফ্লাইং রিঅ্যাকশন"""
+    """শুধু ভিডিও + ফ্লাইং লাভ রিঅ্যাকশন"""
     try:
         # র্যান্ডম ভিডিও সিলেক্ট
         video_url = random.choice(START_VIDEO_URLS)
         
-        # ক্যাপশন স্টাইল ESHANI এর মতো করে
-        styled_caption = f"**✨ {caption_text} ✨**" if not caption_text.startswith("**") else caption_text
-        
         # ভিডিও পাঠানো
         video_msg = await message.reply_video(
             video=video_url,
-            caption=styled_caption,
+            caption=caption_text,
             reply_markup=reply_markup,
             supports_streaming=True
         )
         
-        # হিউজ ফ্লাইং রিঅ্যাকশন
-        await send_flying_reactions(video_msg)
+        # ফ্লাইং লাভ রিঅ্যাকশন (শুধু ❤️ উড়ন্ত অবস্থায়)
+        await send_flying_love_reactions(video_msg)
         
         return video_msg
     except Exception as e:
         print(f"Video send error: {e}")
-        # ব্যাকআপ: ভিডিও না থাকলে টেক্সট মেসেজ
-        return await message.reply_text(f"🌟 {caption_text} 🌟", reply_markup=reply_markup)
+        return await message.reply_text("❌ ভিডিও লোড করতে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।")
 
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
@@ -146,16 +141,11 @@ async def start_pm(client, message: Message, _):
                 )
     else:
         out = private_panel(_)
-        # ESHANI স্টাইলে কাস্টম ক্যাপশন
-        caption_text = f"**🎵 Hey {message.from_user.mention}!**\n\n**✨ THIS IS «{app.mention}» ✨**\n\n🔗 **A PREMIUM MUSIC PLAYER BOT FOR TELEGRAM GROUP & CHANNEL**\n\n❤️ **POWERED BY KAIZEN**"
-        
         await send_start_video(
             client, message,
-            caption_text=caption_text,
+            caption_text=_["start_2"].format(message.from_user.mention, app.mention),
             reply_markup=InlineKeyboardMarkup(out)
         )
-        
-        # LOGGER এ সেন্ড করা
         if await is_on_off(2):
             return await app.send_message(
                 chat_id=config.LOGGER_ID,
@@ -168,14 +158,10 @@ async def start_pm(client, message: Message, _):
 async def start_gp(client, message: Message, _):
     out = start_panel(_)
     uptime = int(time.time() - _boot_)
-    
-    # গ্রুপের জন্য ESHANI স্টাইল ক্যাপশন
-    caption_text = f"**🎵 {app.mention} IS ALIVE!**\n\n✨ **UPTIME:** `{get_readable_time(uptime)}`\n\n💫 **CLICK BELOW BUTTONS TO EXPLORE**"
-    
     try:
         await send_start_video(
             client, message,
-            caption_text=caption_text,
+            caption_text=_["start_1"].format(app.mention, get_readable_time(uptime)),
             reply_markup=InlineKeyboardMarkup(out)
         )
         return await add_served_chat(message.chat.id)
@@ -186,7 +172,7 @@ async def start_gp(client, message: Message, _):
         try:
             await send_start_video(
                 client, message,
-                caption_text=caption_text,
+                caption_text=_["start_1"].format(app.mention, get_readable_time(uptime)),
                 reply_markup=InlineKeyboardMarkup(out)
             )
             return await add_served_chat(message.chat.id)
@@ -224,18 +210,19 @@ async def welcome(client, message: Message):
                 if (ch.title and re.search(r'[\u1000-\u109F]', ch.title)) or \
                     (ch.description and re.search(r'[\u1000-\u109F]', ch.description)):
                         await blacklist_chat(message.chat.id)
-                        await message.reply_text("❌ This group is not allowed to play songs")
+                        await message.reply_text("This group is not allowed to play songs")
                         await app.send_message(LOGGER_ID, f"This group has been blacklisted automatically due to myanmar characters in the chat title, description or message \n Title:{ch.title} \n ID:{message.chat.id}")
                         return await app.leave_chat(message.chat.id)
 
                 out = start_panel(_)
-                
-                # ওয়েলকাম মেসেজ ESHANI স্টাইলে
-                caption_text = f"**🎉 HEY {message.from_user.first_name}!**\n\n**✨ THANKS FOR ADDING ME IN «{message.chat.title}» ✨**\n\n🔗 **I CAN PLAY HIGH QUALITY MUSIC IN VOICE CHAT**\n\n💫 **USE /help TO GET STARTED**"
-                
                 await send_start_video(
                     client, message,
-                    caption_text=caption_text,
+                    caption_text=_["start_3"].format(
+                        message.from_user.first_name,
+                        app.mention,
+                        message.chat.title,
+                        app.mention,
+                    ),
                     reply_markup=InlineKeyboardMarkup(out)
                 )
                 await add_served_chat(message.chat.id)
