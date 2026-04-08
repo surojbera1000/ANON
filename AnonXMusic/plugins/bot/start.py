@@ -80,7 +80,7 @@ async def send_start_video(client, message: Message, caption_text: str, reply_ma
         print(f"Video send error: {e}")
         # ভিডিও না থাকলে কিছুই করবে না (ইমেজ নয়)
         # বিকল্প হিসেবে শুধু টেক্সট মেসেজ দিতে চাইলে এখানে যোগ করুন
-        return await message.reply_text("❌ ভিডিও লোড করতে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।")
+        return await message.reply_text("")
 
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
