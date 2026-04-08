@@ -29,52 +29,42 @@ from AnonXMusic.utils.inline import help_pannel, private_panel, start_panel
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 
-# আপনার দেওয়া ভিডিও লিংক
+# আপনার 6-7 টা ভিডিওর লিংক এখানে দিন (শুধু ভিডিও)
 START_VIDEO_URLS = [
-    "https://files.catbox.moe/3kb787.mp4",
-    "https://files.catbox.moe/aoafwn.mp4",
-    "https://files.catbox.moe/vlcqn3.mp4",
-    "https://files.catbox.moe/93r50w.mp4",
-    "https://files.catbox.moe/f544nb.mp4",
-    "https://files.catbox.moe/93r50w.mp4",
-    "https://files.catbox.moe/vlcqn3.mp4",
+    "https://telegra.ph/file/your_video_1.mp4",
+    "https://telegra.ph/file/your_video_2.mp4",
+    "https://telegra.ph/file/your_video_3.mp4",
+    "https://telegra.ph/file/your_video_4.mp4",
+    "https://telegra.ph/file/your_video_5.mp4",
+    "https://telegra.ph/file/your_video_6.mp4",
+    "https://telegra.ph/file/your_video_7.mp4",
 ]
 
-# ফ্লাইং লাভের জন্য অ্যানিমেটেড স্টিকার (উড়ন্ত হৃদয়)
-FLYING_LOVE_STICKERS = [
-    "CAACAgUAAxkBAAPnXUJkAAH8mXkAARUAAWnIAAV_AAFGAAEWCQACOQsAAgIYVhVbUpEWeWRUUDME",  # Flying heart sticker 1
-    "CAACAgUAAxkBAAPoXUJkAAH8mXoAARUAAWnIAAV_AAFGAAEWCQACOgsAAgIYVhVbUpEWeWRUUDME",  # Flying heart sticker 2
-]
+# ফ্লাইং রিঅ্যাকশন (উড়ন্ত ইফেক্ট) - পরপর অনেকগুলো রিঅ্যাকশন
+async def send_flying_reactions(message: Message):
+    """একসাথে অনেকগুলো রিঅ্যাকশন উড়িয়ে দেয় (ফ্লাইং ইফেক্ট)"""
+    reactions = ['❤️', '🔥', '🎉', '🥳', '🎸', '💚', '👍', '😍', '🤣', '🎵', '💥', '✨']
+    
+    # এলোমেলো করে 8-12টা রিঅ্যাকশন নিবে
+    num_reactions = random.randint(8, 12)
+    selected_reactions = random.sample(reactions, min(num_reactions, len(reactions)))
+    
+    for emoji in selected_reactions:
+        try:
+            await message.react(emoji)
+            await asyncio.sleep(0.15)  # স্পিডি রিঅ্যাকশন - উড়ন্ত ইফেক্টের মতো
+        except Exception as e:
+            print(f"Reaction error: {e}")
+            continue
 
-# ফ্লাইং লাভ ইফেক্ট (একাধিক অ্যানিমেটেড স্টিকার + রিঅ্যাকশন)
-async def send_flying_love_effect(message: Message):
-    """ভিডিওর উপরে ফ্লাইং লাভ ইফেক্ট তৈরি করবে"""
-    try:
-        # 1. প্রথমে দ্রুত রিঅ্যাকশন দেবে (Telegram এর ডিফল্ট)
-        for _ in range(5):
-            await message.react('❤️')
-            await asyncio.sleep(0.15)
-        
-        # 2. অ্যানিমেটেড ফ্লাইং লাভ স্টিকার পাঠাবে (উড়ন্ত ইফেক্ট)
-        for i in range(8):  # 8 বার উড়ন্ত স্টিকার
-            sticker = random.choice(FLYING_LOVE_STICKERS)
-            await message.reply_sticker(sticker)
-            await asyncio.sleep(0.2)
-            
-        # 3. আবারও রিঅ্যাকশন (ফ্লাইং ফিল দিতে)
-        for _ in range(3):
-            await message.react('❤️')
-            await asyncio.sleep(0.1)
-            
-    except Exception as e:
-        print(f"Flying love effect error: {e}")
-
-# ভিডিও সেন্ড করার ফাংশন
+# শুধু ভিডিও সেন্ড করার ফাংশন (কোনো ইমেজ নেই)
 async def send_start_video(client, message: Message, caption_text: str, reply_markup=None):
-    """ভিডিও + ফ্লাইং লাভ ইফেক্ট"""
+    """শুধু ভিডিও + ফ্লাইং রিঅ্যাকশন (কোন ইমেজ নেই)"""
     try:
+        # র্যান্ডম ভিডিও সিলেক্ট
         video_url = random.choice(START_VIDEO_URLS)
         
+        # শুধু ভিডিও পাঠানো (স্টিকারও বাদ দিলাম, শুধু ভিডিও)
         video_msg = await message.reply_video(
             video=video_url,
             caption=caption_text,
@@ -82,13 +72,15 @@ async def send_start_video(client, message: Message, caption_text: str, reply_ma
             supports_streaming=True
         )
         
-        # ফ্লাইং লাভ ইফেক্ট শুরু
-        await send_flying_love_effect(video_msg)
+        # ফ্লাইং রিঅ্যাকশন - উড়ন্ত ইফেক্ট
+        await send_flying_reactions(video_msg)
         
         return video_msg
     except Exception as e:
         print(f"Video send error: {e}")
-        return await message.reply_text("❌ ভিডিও লোড করতে সমস্যা হচ্ছে")
+        # ভিডিও না থাকলে কিছুই করবে না (ইমেজ নয়)
+        # বিকল্প হিসেবে শুধু টেক্সট মেসেজ দিতে চাইলে এখানে যোগ করুন
+        return await message.reply_text("❌ ভিডিও লোড করতে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।")
 
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
